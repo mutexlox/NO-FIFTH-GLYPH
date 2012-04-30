@@ -29,7 +29,8 @@ while True: #main REPL
     print input
 
     mNick = messageParser.getNick(input)
-
+    mChan = messageParser.getChannel(input)
+    message = messageParser.getMessage(input)
     
     if "End of /MOTD command." in input and not(setMode):
         setMode = True
@@ -43,18 +44,17 @@ while True: #main REPL
 		
     #print(repr(getMessage(input)))
     
-    message = messageParser.getMessage(input)
 
     for u in unbans:
         if unbans[u] < time.time():
-            con.sendMessage("MODE " + messageParser.getChannel(input) + " -b" + u)
+            con.sendMessage("MODE " + mChan + " -b" + u)
 
 
-    if ('e' in messageParser.getMessage(input) or 'E' in messageParser.getMessage(input)) and ('foonetic.net' not in input):
+    if ('e' in message or 'E' in message) and ('foonetic.net' not in input):
         # print "LOLOL " + messageParser.getNick(input)
-        con.sendMessage("KICK " + messageParser.getChannel(input) + " " + mNick)
-        con.sendMessage("MODE " + messageParser.getChannel(input) + " +b " + mNick)
-        unbans[mNick] = (messageParser.getChannel(input), time.time() + 60)
+        con.sendMessage("KICK " + mChan + " " + mNick)
+        con.sendMessage("MODE " + mChan + " +b " + mNick)
+        unbans[mNick] = (mChan, time.time() + 60)
 
 
     if mNick in admins:  #admin-only commands
@@ -75,7 +75,7 @@ while True: #main REPL
                     partMessage = " " + partMessage
                     	
                 if messageParser.partDefault(input):
-                    toPart = messageParser.getChannel(input)
+                    toPart = mChan # part current chan if none specified
                 else:
                     toPart = messageParser.getPartChannel(input)
                 #print(repr(toPart))
