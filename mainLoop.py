@@ -35,7 +35,7 @@ while True: #main REPL
         setMode = True
         print "Setting mode +B"
         con.sendMessage("MODE " + nick + " +B") # indicate that we're a bot
-
+    
     pingResponse = messageParser.pingHandler(input)
     if pingResponse != "":
         con.sendMessage("PONG " + pingResponse)
@@ -47,6 +47,7 @@ while True: #main REPL
 
     for u in unbans:
         if unbans[u] < time.time():
+            con.sendMessage("MODE " + messageParser.getChannel(input) + " -b" + u)
 
 
     if ('e' in messageParser.getMessage(input) or 'E' in messageParser.getMessage(input)) and ('foonetic.net' not in input):
