@@ -1,5 +1,6 @@
 import re
 import time
+import sys
 
 import ioHandler
 import messageParser
@@ -42,6 +43,8 @@ while True: #main REPL
             # print "Setting mode +B"
             con.sendMessage("MODE " + nick + " +B") # indicate that we're a bot
             con.sendMessage("PRIVMSG NickServ IDENTIFY short-ead-aup-y") 
+            print sys.argv
+            con.sendMessage("JOIN #" + sys.argv[1])
         
         pingResponse = messageParser.pingHandler(input)
         if pingResponse != "":
@@ -55,7 +58,7 @@ while True: #main REPL
             print "Kicking " + mNick + " for " + message 
             con.sendMessage("KICK " + mChan + " " + mNick)
             con.sendMessage("MODE " + mChan + " +b " + mNick)
-            unbans[mNick] = (mChan, time.time() + 10)
+            unbans[mNick] = (mChan, time.time() + 15)
 
 
         if mNick in admins:  #admin-only commands
