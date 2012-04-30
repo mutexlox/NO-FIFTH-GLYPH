@@ -4,4 +4,4 @@ That fifth glyph in our script is bad! This bot kicks (and bans, for a bit) any 
 
 To run: 
 
-    python mainLoop.py [chan with no # at the start]
+    python mainLoop.py [chan with no # at start]
