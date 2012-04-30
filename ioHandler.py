@@ -2,7 +2,7 @@
 
 import socket
 
-class ircConnection:
+class IRCConnection:
 	def __init__(self, serverName, port=6667):
 		self.connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.connection.connect((serverName, port))
