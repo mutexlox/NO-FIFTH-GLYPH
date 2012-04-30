@@ -43,7 +43,7 @@ while True: #main REPL
             # print "Setting mode +B"
             con.sendMessage("MODE " + nick + " +B") # indicate that we're a bot
             con.sendMessage("PRIVMSG NickServ IDENTIFY short-ead-aup-y") 
-            if len(sys.argv > 1):
+            if len(sys.argv) > 1:
                 con.sendMessage("JOIN #" + sys.argv[1])
         
         pingResponse = messageParser.pingHandler(input)
