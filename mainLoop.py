@@ -5,7 +5,6 @@ import time
 
 import ioHandler
 import messageParser
-# import utilFunctions
 
 admins = set(["joshz"])
 prefix = "&"
@@ -16,7 +15,7 @@ hostName = "joshz"
 serverName = "irc.foonetic.net"
 realName = "joshz"
 
-con = ioHandler.ircConnection("irc.foonetic.net")
+con = ioHandler.IRCConnection("irc.foonetic.net")
 
 con.setNick(nick)
 con.setUser(userName, hostName, serverName, realName)
@@ -34,8 +33,9 @@ while True: #main REPL
     
     if "End of /MOTD command." in input and not(setMode):
         setMode = True
-        print "Setting mode +B"
+        # print "Setting mode +B"
         con.sendMessage("MODE " + nick + " +B") # indicate that we're a bot
+        con.sendMessage("PRIVMSG NickServ IDENTIFY short-ead-aup-y") 
     
     pingResponse = messageParser.pingHandler(input)
     if pingResponse != "":
@@ -44,14 +44,12 @@ while True: #main REPL
 		
     #print(repr(getMessage(input)))
     
-
     for u in unbans:
-        if unbans[u] < time.time():
-            con.sendMessage("MODE " + mChan + " -b" + u)
+        if unbans[u][1] <= time.time():
+            con.sendMessage("MODE " + unbans[u][0] + " -b " + u)
 
-
-    if ('e' in message or 'E' in message) and ('foonetic.net' not in input):
-        # print "LOLOL " + messageParser.getNick(input)
+    if ('e' in message or 'E' in message) and ('foonetic.net' not in input) and setMode and mNick != nick:
+        print "Kicking " + mNick + " for " + message 
         con.sendMessage("KICK " + mChan + " " + mNick)
         con.sendMessage("MODE " + mChan + " +b " + mNick)
         unbans[mNick] = (mChan, time.time() + 60)
@@ -87,6 +85,6 @@ while True: #main REPL
 			
         if messageParser.getMessageType(input) == "INVITE": #auto-join on any invite (by an admin)
             con.sendMessage("JOIN " + message)
-			
+
 time.sleep(0.5)		
 con.close()
