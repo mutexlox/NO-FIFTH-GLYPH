@@ -9,7 +9,7 @@ prefix = "&"
 nick = re.compile(r":([^\d\-][A-Za-z0-9\-_[\]{}\\|`^]{0,29})")
 
 #Get the user-sent message from an IRC message
-message = re.compile(r"[^:]+:(.*$)")
+message = re.compile(r"[^:]+\ :(.*$)")
 
 #Get the type of message from an IRC message
 messageType = re.compile(" ([A-Z]*)")
