@@ -67,7 +67,7 @@ while True: #main REPL
                     quitMessage = messageParser.partOrQuitMessage(input)
                     
                     if quitMessage != "":
-                        con.sendMessage("QUIT" + " :" + quitMessage)
+                        con.sendMessage("QUIT :" + quitMessage)
                     else:
                         con.sendMessage("QUIT")
                     break
