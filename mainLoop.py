@@ -54,10 +54,18 @@ while True: #main REPL
         #print(repr(getMessage(input)))
         
 
-        if ('e' in message or 'E' in message) and messageParser.getMessageType(input) == "PRIVMSG" and mNick != nick:
-            print "Kicking " + mNick + " for " + message 
-            con.sendMessage("KICK " + mChan + " " + mNick)
+        if ('e' in message or 'E' in message) and \
+                messageParser.getMessageType(input) == "PRIVMSG" and \
+                mNick != nick: # don't kick ourselves
+            
+            badWord = message
+            for word in message.split():
+                if 'e' in word or 'E' in word:
+                    badWord = word
+                    break
+            print "Kicking " + mNick + " for " + badWord
             con.sendMessage("MODE " + mChan + " +b " + mNick)
+            con.sendMessage("KICK " + mChan + " " + mNick + " :" + badWord)
             unbans[mNick] = (mChan, time.time() + 15)
 
 
