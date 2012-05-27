@@ -4,4 +4,9 @@ That fifth glyph in our script is bad! This bot kicks (and bans, for a bit) any 
 
 To run: 
 
-    python mainLoop.py [chan with no # at start]
+    python mainLoop.py server password [list of chans, " "-split]
+
+Example:
+
+    python mainLoop.py irc.foonetic.net hunter2 "#foo" "#bar" "#baz"
+    python mainLoop.py irc.foonetic.net hunter2
