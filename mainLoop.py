@@ -25,14 +25,14 @@ def repl(server, password, chans):
             if cpy[user][1] <= time.time():
                 con.sendMessage("MODE " + cpy[user][0] + " -b " + user)
                 del unbans[user]
-        
+
         if input != "":
             print input
 
             mNick = messageParser.getNick(input)
             mChan = messageParser.getChannel(input)
             message = messageParser.getMessage(input)
-            
+
             if "End of /MOTD command." in input and not(setMode):
                 setMode = True
                 # print "Setting mode +B"
@@ -40,16 +40,16 @@ def repl(server, password, chans):
                 con.sendMessage("PRIVMSG NickServ IDENTIFY " + password) 
                 for chan in chans:
                     con.sendMessage("JOIN " + chan)
-            
+
             pingResponse = messageParser.pingHandler(input)
             if pingResponse != "":
                 con.sendMessage("PONG " + pingResponse)
-                
+
 
             if ('e' in message or 'E' in message) and \
                     messageParser.getMessageType(input) == "PRIVMSG" and \
-                    mNick != nick: # don't kick ourselves
-                
+                    mNick != config.nick: # don't kick ourselves
+
                 badWord = ""
                 for word in message.split():
                     if 'e' in word or 'E' in word:
