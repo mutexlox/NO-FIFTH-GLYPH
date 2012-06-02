@@ -1,8 +1,8 @@
 # No Fifth Glyph
 
-That fifth glyph in our script is bad! This bot kicks (and bans, for a bit) any who say it.
+That fifth glyph in our script is bad! This bot -v's (for a bit) any who say it.
 
-To run: 
+To run:
 
     python mainLoop.py server password [list of chans, " "-split]
 
