@@ -16,15 +16,15 @@ def repl(server, password, chans):
 
     setMode = False # have we set +B yet?
 
-    unbans = {} # keep track of who we need to unban, and when.
+    devoiced = {} # keep track of who's devoiced and when they can be revoiced
     while True: #main REPL
         input = con.receive()
-        # Unban if needed
-        cpy = unbans.copy()
+        # +v if needed
+        cpy = devoiced.copy()
         for user in cpy: # cpy[u] is a tuple with (chan, time)
             if cpy[user][1] <= time.time():
-                con.sendMessage("MODE " + cpy[user][0] + " -b " + user)
-                del unbans[user]
+                con.sendMessage("MODE " + cpy[user][0] + " +v " + user)
+                del devoiced[user]
 
         if input != "":
             print input
@@ -37,7 +37,7 @@ def repl(server, password, chans):
                 setMode = True
                 # print "Setting mode +B"
                 con.sendMessage("MODE " + config.nick + " +B") # bot flag
-                con.sendMessage("PRIVMSG NickServ IDENTIFY " + password) 
+                con.sendMessage("PRIVMSG NickServ IDENTIFY " + password)
                 for chan in chans:
                     con.sendMessage("JOIN " + chan)
 
@@ -55,44 +55,50 @@ def repl(server, password, chans):
                     if 'e' in word or 'E' in word:
                         badWord = word
                         break
-                
-                con.sendMessage("MODE " + mChan + " +b " + mNick)
-                con.sendMessage("KICK " + mChan + " " + mNick + " :" + badWord)
-                unbans[mNick] = (mChan, time.time() + 15)
+                con.sendMessage("PRIVMSG " + mChan +
+                                        " '%s' is a horrid word!" %badWord)
+                con.sendMessage("MODE " + mChan + " -v " + mNick)
+                devoiced[mNick] = (mChan, time.time() + 15)
 
+            if messageParser.getMessageType(input) == "JOIN" and \
+                    mNick not in devoiced:
+                con.sendMessage("MODE " +
+                                    messageParser.chanFromJoin(input)
+                                    + " +v " + mNick)
 
             if mNick in config.admins:  #admin-only commands
                 #to avoid accidental commands, ensure command has our prefix
-                if messageParser.hasPrefix(input):  
+                if messageParser.hasPrefix(input):
+
                     if messageParser.isQuit(input):
                         quitMessage = messageParser.partOrQuitMessage(input)
-                        
+
                         if quitMessage != "":
                             con.sendMessage("QUIT :" + quitMessage)
                         else:
                             con.sendMessage("QUIT")
                         break
+
                     if messageParser.isPart(input):
                         partMessage = messageParser.partOrQuitMessage(input)
-                        #print(repr(partMessage))
 
                         if partMessage != "":
                             partMessage = " " + partMessage
-                                
+
                         if messageParser.partDefault(input):
                             toPart = mChan # part current chan if none specified
                         else:
                             toPart = messageParser.getPartChannel(input)
-           
+
 
                         if toPart != "":
                             con.sendMessage("PART " + toPart + partMessage)
-                            #print(repr(toPart + partMessage))
-                #auto-join on any invite (by an admin) 
-                if messageParser.getMessageType(input) == "INVITE": 
+
+                #auto-join on any invite (by an admin)
+                if messageParser.getMessageType(input) == "INVITE":
                     con.sendMessage("JOIN " + message)
 
-    time.sleep(0.5)		
+    time.sleep(0.5)
     con.close()
 
 def main():
