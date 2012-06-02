@@ -5,8 +5,9 @@ import config
 prefix = config.prefix
 
 # Useful test strings:
-# :Emi!~chatzilla@hide-F95A65D1.hsd1.md.comcast.net PRIVMSG Emijoshzbot :&quit test
+# Normal: :Emi!~chatzilla@hide-F95A65D1.hsd1.md.comcast.net PRIVMSG Emijoshzbot :&quit test
 # IPv6: :TGB!~user@1A1ED16D:89725881:A8F36EFF:IP PRIVMSG #xkcd-abcdfghijklmnopqrstuvwxyz :ok.
+# Join: :joshztests!43bc0182@hide-6C77D8AA.mibbit.com JOIN :##joshzTestsHisBot 
 
 # Returns the nick string from an IRC message,
 #     validating against the valid nick characters and length.
@@ -26,6 +27,9 @@ channel = re.compile("\S+ \S+ (\S+)")
 
 # Determines whether the sent message is a PING;
 ping = re.compile("^PING :(.*?)\r")
+
+# In a JOIN message, determines the chan being joined to.
+join = re.compile("JOIN :([^ ]+)")
 
 # Determines whether or not something is a user-given part command
 part = re.compile("^" + prefix + "part")
@@ -103,6 +107,17 @@ def pingHandler(ircMessage):
     except:
         return ""
 
+def chanFromJoin(ircMessage):
+    '''Given an IRC message, return the chan that was joined if it's a JOIN,
+    else the empty string.
+
+    '''
+    joinMatch = re.search(join, ircMessage)
+    try:
+        return joinMatch.group(1)
+    except:
+        return ""
+
 def isPart(ircMessage):
     '''Returns true if and only if the given message is a part command
     
@@ -151,4 +166,3 @@ def getPartChannel(ircMessage):
         return channelToPartMatch.group(1)
     except:
         return ""
-        
