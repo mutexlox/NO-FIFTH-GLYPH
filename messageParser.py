@@ -29,7 +29,7 @@ channel = re.compile("\S+ \S+ (\S+)")
 ping = re.compile("^PING :(.*?)\r")
 
 # In a JOIN message, determines the chan being joined to.
-join = re.compile("JOIN :([^ ]+)")
+join = re.compile("JOIN :([^ ]+?)\r\n")
 
 # Determines whether or not something is a user-given part command
 part = re.compile("^" + prefix + "part")
