@@ -30,6 +30,11 @@ def repl(chans):
                 del devoiced[user]
 
         if fromServer != "":
+            pingResponse = messageParser.pingHandler(fromServer)
+            if pingResponse != "":
+                con.sendMessage("PONG " + pingResponse)
+                continue
+
             print fromServer
 
             mNick = messageParser.getNick(fromServer)
@@ -45,10 +50,6 @@ def repl(chans):
 
                 for chan in chans:
                     con.join(chan)
-
-            pingResponse = messageParser.pingHandler(fromServer)
-            if pingResponse != "":
-                con.sendMessage("PONG " + pingResponse)
 
 
             if (('e' in message or 'E' in message) and
