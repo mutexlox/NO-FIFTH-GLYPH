@@ -1,6 +1,6 @@
 admins = set(["joshz"])  # Users that can send privileged commands to the bot.
 prefix = "&"  # Prepends all bot commands; bot only responds to commands with prefix at the start.
-nick = "noFifthGlyphTest" 
+nick = "noFifthGlyph" 
 userName = "joshzNoFifthBot"
 hostName = "joshz"
 realName = "joshz"
