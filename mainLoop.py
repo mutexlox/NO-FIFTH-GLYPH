@@ -1,54 +1,59 @@
-import re
 import time
 import sys
 
 import config
-import ioHandler
+import ircConnection
 import messageParser
 
 
-def repl(server, password, chans):
+def repl(chans):
 
-    con = ioHandler.IRCConnection(server)
+    con = ircConnection.IRCConnection(config.server)
 
     con.setNick(config.nick)
-    con.setUser(config.userName, config.hostName, server, config.realName)
+    con.setUser(config.userName,
+                config.hostName,
+                config.server,
+                config.realName)
 
-    setMode = False # have we set +B yet?
+    setBot = False  # have we identified as a bot yet?
 
-    devoiced = {} # keep track of who's devoiced and when they can be revoiced
-    while True: #main REPL
-        input = con.receive()
-        # +v if needed
+    devoiced = {}  # keep track of who's devoiced and when they can be revoiced
+    while True:  # main REPL
+        fromServer = con.receive()
+
+        #  +v users whose punishments have expired
         cpy = devoiced.copy()
         for user in cpy: # cpy[u] is a tuple with (chan, time)
             if cpy[user][1] <= time.time():
                 con.sendMessage("MODE " + cpy[user][0] + " +v " + user)
                 del devoiced[user]
 
-        if input != "":
-            print input
+        if fromServer != "":
+            print fromServer
 
-            mNick = messageParser.getNick(input)
-            mChan = messageParser.getChannel(input)
-            message = messageParser.getMessage(input)
+            mNick = messageParser.getNick(fromServer)
+            mChan = messageParser.getChannel(fromServer)
+            message = messageParser.getMessage(fromServer)
 
-            if "End of /MOTD command." in input and not(setMode):
-                setMode = True
-                # print "Setting mode +B"
-                con.sendMessage("MODE " + config.nick + " +B") # bot flag
-                con.sendMessage("PRIVMSG NickServ IDENTIFY " + password)
+            if "End of /MOTD command." in fromServer and not setBot:
+                setBot = True
+
+                con.setBot(config.nick)
+                if config.password != "":
+                    con.authenticate(config.password)
+
                 for chan in chans:
-                    con.sendMessage("JOIN " + chan)
+                    con.join(chan)
 
-            pingResponse = messageParser.pingHandler(input)
+            pingResponse = messageParser.pingHandler(fromServer)
             if pingResponse != "":
                 con.sendMessage("PONG " + pingResponse)
 
 
-            if ('e' in message or 'E' in message) and \
-                    messageParser.getMessageType(input) == "PRIVMSG" and \
-                    mNick != config.nick: # don't kick ourselves
+            if (('e' in message or 'E' in message) and
+                    messageParser.getMessageType(fromServer) == "PRIVMSG" and
+                    mNick != config.nick): # don't devoice ourselves
 
                 badWord = ""
                 for word in message.split():
@@ -56,56 +61,46 @@ def repl(server, password, chans):
                         badWord = word
                         break
                 con.sendMessage("PRIVMSG " + mChan +
-                                        " '%s' is a horrid word!" %badWord)
+                                        " '%s' is a horrid word!" % badWord)
                 con.sendMessage("MODE " + mChan + " -v " + mNick)
                 devoiced[mNick] = (mChan, time.time() + 15)
-
-            if messageParser.getMessageType(input) == "JOIN" and \
-                    mNick not in devoiced:
-                con.sendMessage("MODE " +
-                                    messageParser.chanFromJoin(input)
-                                    + " +v " + mNick)
+           
+            # make sure that new people get to talk,
+            # and that rejoining doesn't get around a -v
+            if (messageParser.getMessageType(fromServer) == "JOIN" and
+                    mNick not in devoiced): 
+                con.sendMessage("MODE " + messageParser.chanFromJoin(fromServer)
+                                          + " +v " + mNick)
 
             if mNick in config.admins:  #admin-only commands
                 #to avoid accidental commands, ensure command has our prefix
-                if messageParser.hasPrefix(input):
+                if messageParser.hasPrefix(fromServer):
 
-                    if messageParser.isQuit(input):
-                        quitMessage = messageParser.partOrQuitMessage(input)
+                    if messageParser.isQuit(fromServer):
+                        quitMessage = messageParser.partOrQuitMessage(fromServer)
 
-                        if quitMessage != "":
-                            con.sendMessage("QUIT :" + quitMessage)
-                        else:
-                            con.sendMessage("QUIT")
+                        con.quit(quitMessage)
                         break
 
-                    if messageParser.isPart(input):
-                        partMessage = messageParser.partOrQuitMessage(input)
+                    if messageParser.isPart(fromServer):
+                        partMessage = messageParser.partOrQuitMessage(fromServer)
 
-                        if partMessage != "":
-                            partMessage = " " + partMessage
-
-                        if messageParser.partDefault(input):
+                        if messageParser.partDefault(fromServer):
                             toPart = mChan # part current chan if none specified
                         else:
-                            toPart = messageParser.getPartChannel(input)
+                            toPart = messageParser.getPartChannel(fromServer)
 
-
-                        if toPart != "":
-                            con.sendMessage("PART " + toPart + partMessage)
+                        con.part(partMessage, toPart)
 
                 #auto-join on any invite (by an admin)
-                if messageParser.getMessageType(input) == "INVITE":
-                    con.sendMessage("JOIN " + message)
+                if messageParser.getMessageType(fromServer) == "INVITE":
+                    con.join(message)
 
     time.sleep(0.5)
     con.close()
 
 def main():
-    if len(sys.argv) < 3:
-        print "Usage: python mainLoop.py server password [chans]"
-    else:
-        repl(sys.argv[1], sys.argv[2], sys.argv[3:])
+    repl(sys.argv[1:])
 
 if __name__ == '__main__':
     main()
