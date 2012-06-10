@@ -40,6 +40,7 @@ def repl(chans):
             mNick = messageParser.getNick(fromServer)
             mChan = messageParser.getChannel(fromServer)
             message = messageParser.getMessage(fromServer)
+            isPM = messageParser.isPM(fromServer)
 
             if "End of /MOTD command." in fromServer and not setBot:
                 setBot = True
@@ -61,10 +62,12 @@ def repl(chans):
                     if 'e' in word or 'E' in word:
                         badWord = word
                         break
-                con.sendMessage("PRIVMSG " + mChan +
-                                        " '%s' is a horrid word!" % badWord)
-                con.sendMessage("MODE " + mChan + " -v " + mNick)
-                devoiced[mNick] = (mChan, time.time() + 15)
+
+                con.reply("'%s' is a horrid word!" % badWord,
+                         mNick, mChan, isPM)
+                if not isPM:
+                    con.sendMessage("MODE " + mChan + " -v " + mNick)
+                    devoiced[mNick] = (mChan, time.time() + 15)
            
             # make sure that new people get to talk,
             # and that rejoining doesn't get around a -v

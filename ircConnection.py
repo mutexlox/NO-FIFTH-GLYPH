@@ -12,13 +12,12 @@ class IRCConnection:
     def sendMessage(self, toSend):
         '''Helper function that sends the given
            string as an IRC message.
-
         '''
-        self.connection.send(str(toSend + "\r\n"))
+        print toSend
+        self.connection.send(str(toSend) + "\r\n")
 
     def receive(self):
         '''Recieve 512 bytes from the connection (512 bytes == 1 message)
-
         '''
         # time out after a reasonable period of time so we revoice quickly
         ready = select.select([self.connection], [], [], 0.2)
@@ -29,13 +28,11 @@ class IRCConnection:
 
     def setNick(self, nick):
         '''Sets the nick to given string.
-
         '''
         self.sendMessage("NICK " + nick)
 
     def setUser(self, userName, hostName, serverName, realName):
         '''Set the user info as given.
-
         '''
         self.sendMessage("USER " + userName + " " +
                                    hostName + " " +
@@ -44,15 +41,17 @@ class IRCConnection:
 
     def authenticate(self, password):
         '''Authenticate with NickServ with given password.
-
         '''
         self.sendMessage("PRIVMSG NickServ IDENTIFY " + password)
 
     def setBot(self, nick):
         '''Tell the server that we're a bot. (Note: This is network-dependent!)
-
         '''
         config.botIdentify(self, botNick=nick)
+
+    def reply(self, toSend, nick, chan, isPM):
+        sendTo = nick if isPM else chan
+        self.sendMessage("PRIVMSG " + sendTo + " :" + toSend)
 
     def quit(self, quitMessage):
         if quitMessage == "":
@@ -72,6 +71,5 @@ class IRCConnection:
 
     def close(self):
         '''Close the connection.
-
         '''
         self.connection.close()
