@@ -13,7 +13,8 @@ class IRCConnection:
         '''Helper function that sends the given
            string as an IRC message.
         '''
-        print toSend
+        if not toSend.startswith("PONG"):
+            print toSend
         self.connection.send(str(toSend) + "\r\n")
 
     def receive(self):
