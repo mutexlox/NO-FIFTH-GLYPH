@@ -5,6 +5,7 @@ userName = "joshzNoFifthBot"
 hostName = "joshz"
 realName = "joshz"
 server = "irc.foonetic.net"  # Server to connect to
+port = 6667
 password = ""  # Password to use on that server, if any (blank password means no authentication!)
 
 def botIdentify(con, botNick=""):

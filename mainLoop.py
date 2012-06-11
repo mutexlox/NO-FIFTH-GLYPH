@@ -8,7 +8,7 @@ import messageParser
 
 def repl(chans):
 
-    con = ircConnection.IRCConnection(config.server)
+    con = ircConnection.IRCConnection(config.server, config.port)
 
     con.setNick(config.nick)
     con.setUser(config.userName,
@@ -29,7 +29,7 @@ def repl(chans):
                 con.sendMessage("MODE " + cpy[user][0] + " +v " + user)
                 del devoiced[user]
 
-        if fromServer is not None: 
+        if fromServer is not None:
             pingResponse = messageParser.pingHandler(fromServer)
             if pingResponse != "":
                 con.sendMessage("PONG " + pingResponse)
@@ -46,6 +46,7 @@ def repl(chans):
                 setBot = True
 
                 con.setBot(config.nick)
+
                 if config.password != "":
                     con.authenticate(config.password)
 
@@ -68,11 +69,11 @@ def repl(chans):
                 if not isPM:
                     con.sendMessage("MODE " + mChan + " -v " + mNick)
                     devoiced[mNick] = (mChan, time.time() + 15)
-           
+
             # make sure that new people get to talk,
             # and that rejoining doesn't get around a -v
             if (messageParser.getMessageType(fromServer) == "JOIN" and
-                    mNick not in devoiced): 
+                    mNick not in devoiced):
                 con.sendMessage("MODE " + messageParser.chanFromJoin(fromServer)
                                           + " +v " + mNick)
 
