@@ -29,7 +29,7 @@ def repl(chans):
                 con.sendMessage("MODE " + cpy[user][0] + " +v " + user)
                 del devoiced[user]
 
-        if fromServer != "":
+        if fromServer is not None: 
             pingResponse = messageParser.pingHandler(fromServer)
             if pingResponse != "":
                 con.sendMessage("PONG " + pingResponse)

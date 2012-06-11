@@ -25,7 +25,7 @@ class IRCConnection:
         if ready[0]:
             return str(self.connection.recv(512))
         else:
-            return ""
+            return None
 
     def setNick(self, nick):
         '''Sets the nick to given string.
