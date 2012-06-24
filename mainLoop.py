@@ -104,8 +104,6 @@ def repl(chans):
     time.sleep(0.5)
     con.close()
 
-def main():
-    repl(sys.argv[1:])
 
 if __name__ == '__main__':
-    main()
+    repl(sys.argv[1:])
